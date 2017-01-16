@@ -61,6 +61,8 @@ public enum glfw {
         glfwPollEvents()
     }
     
+    
+    
     public final class Monitor {
         
 //        private var pointer: OpaquePointer
@@ -286,25 +288,96 @@ public enum glfw {
             }
         }
         
-        public var size: Size {
-            guard let pointer = self.pointer else { return .zero }
-            var width: Int32 = 0
-            var height: Int32 = 0
+        public struct Callbacks {
             
-            glfwGetWindowSize(pointer, &width, &height)
-            return Size(width: Int(width), height: Int(height))
+            private static var windows = [OpaquePointer : Window]()
+            
+            internal static func clear(for window: Window) {
+                guard let pointer = window.pointer else { return }
+                Callbacks.windows[pointer] = nil
+            }
+            
+            public typealias WindowCallback = (Window) -> Void
+            public typealias WindowPositionCallback = (Window, Point) -> Void
+            public typealias WindowSizeCallback = (Window, Size) -> Void
+            public typealias WindowFocusCallback = (Window, Bool) -> Void
+            
+            public var closed: WindowCallback? {
+                didSet {
+                    guard let pointer = self.window?.pointer else { return }
+                    if oldValue == nil {
+                        self.setClosedCallback()
+                    }
+                    Callbacks.windows[pointer] = self.window
+                }
+            }
+            public var position: WindowSizeCallback? {
+                didSet {
+                    
+                }
+            }
+            public var size: WindowSizeCallback? {
+                didSet {
+                    
+                }
+            }
+            public var focused: WindowFocusCallback? {
+                didSet {
+                    
+                }
+            }
+            
+            private weak var window: Window?
+            fileprivate init(window: Window?) {
+                self.window = window
+            }
+            
+            private func setClosedCallback() {
+                guard let pointer = self.window?.pointer else { return }
+                glfwSetWindowCloseCallback(pointer) { pointer in
+                    guard let pointer = pointer,
+                        let window = Callbacks.windows[pointer] else { return }
+                    window.callbacks.closed?(window)
+                }
+            }
+        }
+        
+        public var size: Size {
+            get {
+                guard let pointer = self.pointer else { return .zero }
+                var width: Int32 = 0
+                var height: Int32 = 0
+                
+                glfwGetWindowSize(pointer, &width, &height)
+                return Size(width: Int(width), height: Int(height))
+            }
+            set {
+                guard let pointer = self.pointer else { return }
+                glfwSetWindowSize(pointer, Int32(newValue.width), Int32(newValue.height))
+            }
         }
         
         public var frame: Rect {
-            guard let pointer = self.pointer else { return .zero }
-            var x: Int32 = 0
-            var y: Int32 = 0
-            var right: Int32 = 0
-            var bottom: Int32 = 0
-            
-            glfwGetWindowFrameSize(pointer, &x, &y, &right, &bottom)
-            
-            return Rect(x: Int(x), y: Int(y), width: Int(right - x), height: Int(bottom - y))
+            get {
+                guard let pointer = self.pointer else { return .zero }
+                var x: Int32 = 0
+                var y: Int32 = 0
+                var right: Int32 = 0
+                var bottom: Int32 = 0
+                
+                glfwGetWindowFrameSize(pointer, &x, &y, &right, &bottom)
+                
+                return Rect(x: Int(x), y: Int(y), width: Int(right - x), height: Int(bottom - y))
+            }
+            set {
+                guard let pointer = self.pointer else { return }
+                
+                let position = newValue.origin
+                let size = newValue.size
+                
+                glfwSetWindowPos(pointer, Int32(position.x), Int32(position.y))
+                glfwSetWindowSize(pointer, Int32(size.width), Int32(size.height))
+            }
         }
         
         private var pointer: OpaquePointer?
@@ -313,9 +386,18 @@ public enum glfw {
             Framebuffer(window: self)
         }()
         
+        public lazy var callbacks: Callbacks = { [weak self] in
+            Callbacks(window: self)
+        }()
+        
         public var shouldClose: Bool {
             guard let pointer = self.pointer else { return false }
             return glfwWindowShouldClose(pointer) == 1
+        }
+        
+        fileprivate init?(pointer: OpaquePointer?) {
+            guard let pointer = pointer else { return }
+            self.pointer = pointer
         }
         
         public init?(width: Int, height: Int, title: String = "", monitor: Monitor? = nil, hints: [Hint] = []) {
@@ -339,6 +421,7 @@ public enum glfw {
         
         public func destroy() {
             guard let pointer = self.pointer else { return }
+            Callbacks.clear(for: self)
             glfwDestroyWindow(pointer)
             self.pointer = nil
         }
