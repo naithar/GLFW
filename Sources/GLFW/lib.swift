@@ -132,10 +132,10 @@ public enum glfw {
                     return GLFW_DOUBLEBUFFER
                 case .clientAPI:
                     return GLFW_CLIENT_API
-                case .versionMajor:
-                    return GLFW_VERSION_MAJOR
-                case .versionMinor:
-                    return GLFW_VERSION_MINOR
+                case .contextVersionMajor:
+                    return GLFW_CONTEXT_VERSION_MAJOR
+                case .contextVersionMinor:
+                    return GLFW_CONTEXT_VERSION_MINOR
                 case .contextRobustness:
                     return GLFW_CONTEXT_ROBUSTNESS
                 case .contextReleaseBehavior:
@@ -161,8 +161,7 @@ public enum glfw {
                          .sRGBCapable(let value),
                          .doubleBuffer(let value),
                          .openGLForwardCompat(let value),
-                         .openGLDebugContext(let value),
-                         .openGLProfile(let value):
+                         .openGLDebugContext(let value):
                         return value ? GLFW_TRUE : GLFW_FALSE
                 case .redBits(let value),
                      .greenBits(let value),
@@ -177,14 +176,16 @@ public enum glfw {
                      .auxBuffers(let value),
                      .samples(let value),
                      .refreshRate(let value),
-                     .versionMajor(let value),
-                     .versionMinor(let value):
+                     .contextVersionMajor(let value),
+                     .contextVersionMinor(let value):
                     return Int32(value)
                 case .clientAPI(let value):
                     return value.raw
                 case .contextRobustness(let value):
                     return value.raw
                 case .contextReleaseBehavior(let value):
+                    return value.raw
+                case .openGLProfile(let value):
                     return value.raw
                 }
             }
@@ -227,8 +228,8 @@ public enum glfw {
             }
             
             case clientAPI(ClientAPI)
-            case versionMajor(Int)
-            case versionMinor(Int)
+            case contextVersionMajor(Int)
+            case contextVersionMinor(Int)
             
             public enum ContextRobustness {
                 case none
@@ -269,7 +270,25 @@ public enum glfw {
             case contextReleaseBehavior(ContextReleaseBehavior)
             case openGLForwardCompat(Bool)
             case openGLDebugContext(Bool)
-            case openGLProfile(Bool)
+            
+            public enum OpenGLProfile {
+                case any
+                case compat
+                case core
+                
+                internal var raw: Int32 {
+                    switch self {
+                    case .any:
+                        return GLFW_OPENGL_ANY_PROFILE
+                    case .compat:
+                        return GLFW_OPENGL_COMPAT_PROFILE
+                    case .core:
+                        return GLFW_OPENGL_CORE_PROFILE
+                    }
+                }
+            }
+            
+            case openGLProfile(OpenGLProfile)
         }
         
         public struct Framebuffer {
