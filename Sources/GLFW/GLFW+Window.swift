@@ -18,13 +18,21 @@ public typealias Rect = CGRect
 public extension glfw {
     
     public static func set(windowHint hint: Window.Hint) {
-        glfwWindowHint(hint.name, hint.value)
+        if case .default = hint {
+            self.resetWindowHints()
+        } else {
+            glfwWindowHint(hint.name, hint.value)
+        }
     }
     
     public static func set(windowHints hints: [Window.Hint]) {
         for hint in hints {
             self.set(windowHint: hint)
         }
+    }
+    
+    public static func resetWindowHints() {
+        glfwDefaultWindowHints()
     }
     
     public final class Window {
@@ -420,8 +428,12 @@ public extension glfw.Window {
     
     public enum Hint {
         
+        case `default`
+        
         internal var name: Int32 {
             switch self {
+            case .default:
+                return -1
             case .resizable:
                 return GLFW_RESIZABLE
             case .visible:
@@ -487,6 +499,8 @@ public extension glfw.Window {
         
         internal var value: Int32 {
             switch self {
+            case .default:
+                return -1
             case .resizable(let value),
                  .visible(let value),
                  .decorated(let value),
