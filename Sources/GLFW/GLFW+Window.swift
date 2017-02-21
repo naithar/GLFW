@@ -47,11 +47,19 @@ public extension glfw {
         public lazy var framebuffer: Framebuffer = { [weak self] in Framebuffer(window: self) }()
         public lazy var callbacks: Callbacks = { [weak self] in Callbacks(window: self) }()
         
-        fileprivate init?(pointer: OpaquePointer?) {
-            guard let pointer = pointer else { return nil }
-            self.pointer = pointer
-            Window.map[pointer] = self
+        public var title: String? {
+            didSet {
+                guard let pointer = self.pointer else { return }
+                glfwSetWindowTitle(pointer, self.title ?? "")
+            }
         }
+        
+        // TODO: remove
+//        fileprivate init?(pointer: OpaquePointer?) {
+//            guard let pointer = pointer else { return nil }
+//            self.pointer = pointer
+//            Window.map[pointer] = self
+//        }
         
         public init?(width: CGFloat,
                      height: CGFloat,
@@ -67,6 +75,7 @@ public extension glfw {
                                             monitor?.pointer,
                                             share?.pointer)
             guard let pointer = self.pointer else { return nil }
+            self.title = title
             Window.map[pointer] = self
         }
         
@@ -110,6 +119,20 @@ public extension glfw.Window {
         public typealias WindowBoolCallback = (glfw.Window, Bool) -> Void
         
         private weak var window: glfw.Window?
+
+        // TODO: decide the need for this method.
+//        private func setCallback<GLFWCallback, WindowCallback>(
+//            oldValue: WindowCallback?,
+//            newValue: WindowCallback?,
+//            function: (OpaquePointer?, GLFWCallback?) -> GLFWCallback?,
+//            action: GLFWCallback?) {
+//            guard let pointer = self.window?.pointer else { return }
+//            if oldValue == nil {
+//                _ = function(pointer, action)
+//            } else if newValue == nil && oldValue != nil {
+//                _ = function(pointer, nil)
+//            }
+//        }
         
         deinit {
             self.clear()
@@ -372,6 +395,16 @@ public extension glfw.Window {
         }
     }
     
+    public var isFocused: Bool {
+        get {
+            return self.value(for: .focused) != 0
+        }
+    }
+    
+    public func focus() {
+        guard let pointer = self.pointer else { return }
+        glfwFocusWindow(pointer)
+    }
     
     //TODO: isFocused
     
@@ -414,9 +447,12 @@ public extension glfw.Window {
     
     public enum Attribute {
         case visible
+        case focused
         
         internal var name: Int32 {
             switch self {
+            case .focused:
+                return GLFW_FOCUSED
             case .visible:
                 return GLFW_VISIBLE
             }
