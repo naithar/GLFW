@@ -109,6 +109,8 @@ public extension glfw {
     }
 }
 
+//TODO: cursor http://www.glfw.org/docs/latest/input_guide.html#cursor_standard
+
 public extension glfw.Window {
     
     public class Callbacks {
@@ -192,6 +194,7 @@ public extension glfw.Window {
         public var size: WindowSizeCallback? {
             didSet {
                 guard let pointer = self.window?.pointer else { return }
+                
                 if oldValue == nil {
                     glfwSetWindowSizeCallback(pointer) { pointer, width, height in
                         guard let pointer = pointer,
@@ -355,6 +358,63 @@ public extension glfw.Window {
         }
         
         //TODO: common code
+        
+        // MARK: Cursor position callback
+        
+        public var cursorPosition: WindowPositionCallback? {
+            didSet {
+                guard let pointer = self.window?.pointer else { return }
+                if oldValue == nil {
+                    glfwSetCursorPosCallback(pointer) { pointer, x, y in
+                        guard let pointer = pointer,
+                            let window = glfw.Window.map[pointer],
+                            let callback = window.callbacks.cursorPosition else {
+                                return
+                        }
+                        
+                        let position = Point(x: x, y: y)
+                        callback(window, position)
+                    }
+                } else if self.cursorPosition == nil && oldValue != nil {
+                    glfwSetCursorPosCallback(pointer, nil)
+                }
+            }
+        }
+        
+        @discardableResult
+        public func cursorPosition(_ callback: WindowPositionCallback?) -> Callbacks {
+            self.cursorPosition = callback
+            return self
+        }
+        
+        // MARK: Cursor position callback
+        
+        public var cursorEnter: WindowBoolCallback? {
+            didSet {
+                guard let pointer = self.window?.pointer else { return }
+                if oldValue == nil {
+                    glfwSetCursorEnterCallback(pointer) { pointer, value in
+                        guard let pointer = pointer,
+                            let window = glfw.Window.map[pointer],
+                            let callback = window.callbacks.cursorEnter else {
+                                return
+                        }
+                        
+                        let value = value != 0
+                        callback(window, value)
+                    }
+                } else if self.cursorPosition == nil && oldValue != nil {
+                    glfwSetCursorEnterCallback(pointer, nil)
+                }
+            }
+        }
+        
+        @discardableResult
+        public func cursorEnter(_ callback: WindowBoolCallback?) -> Callbacks {
+            self.cursorEnter = callback
+            return self
+        }
+
     }
 }
 
