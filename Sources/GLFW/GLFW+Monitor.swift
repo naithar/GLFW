@@ -7,7 +7,7 @@
 //
 
 import CGLFW
-//import Foundation
+import Foundation
 
 public extension glfw {
     
@@ -72,6 +72,52 @@ public extension glfw {
 
 public extension glfw.Monitor {
     
+    public struct VideoMode {
+        
+        public struct Bits {
+        
+            public static let zero = Bits.init(red: 0, green: 0, blue: 0)
+            
+            public var red: Int
+            public var green: Int
+            public var blue: Int
+            
+            fileprivate init(red: Int, green: Int, blue: Int) {
+                self.red = red
+                self.green = green
+                self.blue = blue
+            }
+        }
+        
+        static let none = VideoMode()
+        
+        private var mode: GLFWvidmode?
+        
+        private init() {
+            
+        }
+        
+        fileprivate init?(mode: GLFWvidmode?) {
+            guard let mode = mode else { return nil }
+            self.mode = mode
+        }
+        
+        public var size: Size {
+            guard let mode = self.mode else { return .dontCare }
+            return Size(width: Int(mode.width), height: Int(mode.height))
+        }
+        
+        public var refreshRate: Int {
+            guard let mode = self.mode else { return .dontCare }
+            return Int(mode.refreshRate)
+        }
+        
+        public var bits: Bits {
+            guard let mode = self.mode else { return .zero }
+            return Bits(red: Int(mode.redBits), green: Int(mode.greenBits), blue: Int(mode.blueBits))
+        }
+        
+    }
     //TODO: video mode
     
     public var name: String? {
@@ -99,5 +145,29 @@ public extension glfw.Monitor {
         glfwGetMonitorPhysicalSize(pointer, &width, &height)
         
         return Size(width: Int(width), height: Int(height))
+    }
+    
+    public var currentVideoMode: VideoMode {
+        guard let pointer = self.pointer else { return .none }
+        let videoMode = glfwGetVideoMode(pointer)
+        return VideoMode(mode: videoMode?.pointee) ?? .none
+    }
+    
+    public var videoModes: [VideoMode] {
+        guard let pointer = self.pointer else { return [] }
+        
+        var count: Int32 = 0
+        let videoModes = glfwGetVideoModes(pointer, &count)
+        
+        var modes = [VideoMode]()
+        
+        for index in 0..<Int(count) {
+            guard let pointer = videoModes?.advanced(by: index).pointee,
+                let mode = VideoMode(mode: pointer) else { continue }
+            
+            modes.append(mode)
+        }
+        
+        return modes
     }
 }
