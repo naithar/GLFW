@@ -118,11 +118,171 @@ public extension glfw.Window {
         
         public struct KeyboardInput {
             
+            //http://www.glfw.org/docs/latest/group__keys.html#ga9845be48a745fc232045c9ec174d8820
             public enum Key {
                 case unknown(Int32)
+                case space
+                case apostrophe
+                case comma
+                case minus
+                case slash
+                case semicolon
+                case equal
+                case leftBracket //TODO: .bracket(.left)
+                case rightBracket //TODO: .bracket(.right)
+                case backslash
+                case graveAccent
+                case worldOne
+                case worldTwo
+                case escape
+                case enter
+                case tab
+                case backspace
+                case insert
+                case delete
+                case right
+                case left
+                case down
+                case up
+                case pageUp
+                case pageDown
+                case home
+                case end
+                case capsLock
+                case scrollLock
+                case numLock
+                case printScreen
+                case pause
+                case leftShift
+                case leftControl
+                case leftAlt
+                case leftSuper
+                case rightShift
+                case rightControl
+                case rightAlt
+                case rightSuper
+                case menu
+                
+                // TODO: f keys
+                // TODO: kp keys
+                
+                public enum Number: Int {
+                    case zero = 0
+                    case one = 1
+                    case two = 2
+                    case three = 3
+                    case four = 4
+                    case five = 5
+                    case six = 6
+                    case seven = 7
+                    case eight = 8
+                    case nine = 9//...nine
+                }
+                
+                public enum Character {
+                    case a // ...z
+                }
+                
+                case number(Number)
+                case character(Character)
                 
                 fileprivate init(value: Int32) {
-                    self = .unknown(value)
+                    switch value {
+                    case GLFW_KEY_SPACE:
+                        self = .space
+                    case GLFW_KEY_APOSTROPHE:
+                        self = .apostrophe
+                    case GLFW_KEY_COMMA:
+                        self = .comma
+                    case GLFW_KEY_MINUS:
+                        self = .minus
+                    case GLFW_KEY_SLASH:
+                        self = .slash
+                    case GLFW_KEY_SEMICOLON:
+                        self = .semicolon
+                    case GLFW_KEY_EQUAL:
+                        self = .equal
+                    case GLFW_KEY_LEFT_BRACKET:
+                        self = .leftBracket
+                    case GLFW_KEY_RIGHT_BRACKET:
+                        self = .rightBracket
+                    case GLFW_KEY_BACKSLASH:
+                        self = .backslash
+                    case GLFW_KEY_GRAVE_ACCENT:
+                        self = .graveAccent
+                    case GLFW_KEY_WORLD_1:
+                        self = .worldOne
+                    case GLFW_KEY_WORLD_2:
+                        self = .worldTwo
+                    case GLFW_KEY_ESCAPE:
+                        self = .escape
+                    case GLFW_KEY_ENTER:
+                        self = .enter
+                    case GLFW_KEY_TAB:
+                        self = .tab
+                    case GLFW_KEY_BACKSPACE:
+                        self = .backspace
+                    case GLFW_KEY_INSERT:
+                        self = .insert
+                    case GLFW_KEY_DELETE:
+                        self = .delete
+                    case GLFW_KEY_RIGHT:
+                        self = .right
+                    case GLFW_KEY_LEFT:
+                        self = .left
+                    case GLFW_KEY_DOWN:
+                        self = .down
+                    case GLFW_KEY_UP:
+                        self = .up
+                    case GLFW_KEY_PAGE_UP:
+                        self = .pageUp
+                    case GLFW_KEY_PAGE_DOWN:
+                        self = .pageDown
+                    case GLFW_KEY_HOME:
+                        self = .home
+                    case GLFW_KEY_END:
+                        self = .end
+                    case GLFW_KEY_CAPS_LOCK:
+                        self = .capsLock
+                    case GLFW_KEY_SCROLL_LOCK:
+                        self = .scrollLock
+                    case GLFW_KEY_NUM_LOCK:
+                        self = .numLock
+                    case GLFW_KEY_PRINT_SCREEN:
+                        self = .printScreen
+                    case GLFW_KEY_PAUSE:
+                        self = .pause
+                    case GLFW_KEY_LEFT_SHIFT:
+                        self = .leftShift
+                    case GLFW_KEY_LEFT_CONTROL:
+                        self = .leftControl
+                    case GLFW_KEY_LEFT_ALT:
+                        self = .leftAlt
+                    case GLFW_KEY_LEFT_SUPER:
+                        self = .leftSuper
+                    case GLFW_KEY_RIGHT_SHIFT:
+                        self = .rightShift
+                    case GLFW_KEY_RIGHT_CONTROL:
+                        self = .rightControl
+                    case GLFW_KEY_RIGHT_ALT:
+                        self = .rightAlt
+                    case GLFW_KEY_RIGHT_SUPER:
+                        self = .rightSuper
+                    case GLFW_KEY_MENU, GLFW_KEY_LAST:
+                        self = .menu
+                    case GLFW_KEY_0...GLFW_KEY_9:
+                        let numberValue = Int(value - 48)
+                        guard let number = Number(rawValue: numberValue) else {
+                            self = .unknown(value)
+                            return
+                        }
+                        self = .number(number)
+                    case GLFW_KEY_A...GLFW_KEY_Z:
+                        fallthrough
+                    default:
+                        self = .unknown(value)
+                    }
+                    
                 }
             }
             
@@ -164,13 +324,13 @@ public extension glfw.Window {
             }
             //TODO: keys http://www.glfw.org/docs/latest/group__keys.html#gabf48fcc3afbe69349df432b470c96ef2
             public var key: Key
-            public var scancode: Int32
+            public var scancode: Int
             public var action: Action
             public var modifiers: Modifier
             
             fileprivate init(key: Int32, scancode: Int32, action: Int32, modifiers: Int32) {
                 self.key = Key(value: key)
-                self.scancode = scancode
+                self.scancode = Int(scancode)
                 self.action = Action(value: action)
                 self.modifiers = Modifier(rawValue: modifiers)
             }
