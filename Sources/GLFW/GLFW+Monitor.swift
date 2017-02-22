@@ -118,7 +118,46 @@ public extension glfw.Monitor {
         }
         
     }
-    //TODO: video mode
+    
+    
+    public struct GammaRamp {
+        
+        static let none = GammaRamp()
+        
+        private var ramp: GLFWgammaramp?
+        
+        private init() {
+            
+        }
+        
+        fileprivate init?(ramp: GLFWgammaramp?) {
+            guard let ramp = ramp else { return nil }
+            self.ramp = ramp
+        }
+        
+        public lazy var size: Int = {
+            guard let ramp = self.ramp else { return 0 }
+            return Int(ramp.size)
+        }()
+        
+        public lazy var red: [Int] = {
+            guard let ramp = self.ramp, let red = ramp.red else { return [] }
+            let buffer = UnsafeBufferPointer(start: red, count: self.size)
+            return [UInt16](buffer).map { Int($0) }
+        }()
+        
+        public lazy var green: [Int] = {
+            guard let ramp = self.ramp, let green = ramp.green else { return [] }
+            let buffer = UnsafeBufferPointer(start: green, count: self.size)
+            return [UInt16](buffer).map { Int($0) }
+        }()
+        
+        public lazy var blue: [Int] = {
+            guard let ramp = self.ramp, let blue = ramp.blue else { return [] }
+            let buffer = UnsafeBufferPointer(start: blue, count: self.size)
+            return [UInt16](buffer).map { Int($0) }
+        }()
+    }
     
     public var name: String? {
         guard let pointer = self.pointer,
@@ -169,5 +208,12 @@ public extension glfw.Monitor {
         }
         
         return modes
+    }
+    
+    //TODO: set http://www.glfw.org/docs/latest/group__monitor.html#ga583f0ffd0d29613d8cd172b996bbf0dd
+    public var gammaRamp: GammaRamp {
+        guard let pointer = self.pointer else { return .none }
+        let ramp = glfwGetGammaRamp(pointer)
+        return GammaRamp(ramp: ramp?.pointee) ?? .none
     }
 }
