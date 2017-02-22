@@ -521,6 +521,20 @@ public extension glfw.Window {
 //        return nil
 //    }
     
+    public func set(monitor: glfw.Monitor?, x: CGFloat? = nil, y: CGFloat? = nil, width: CGFloat? = nil, height: CGFloat? = nil, refreshRate: Int? = nil) {
+        guard let pointer = self.pointer else { return }
+        guard let monitor = monitor else { return }
+        let videoMode = monitor.currentVideoMode
+        
+        let x = x ?? 0
+        let y = y ?? 0
+        let width = width ?? videoMode.size.width
+        let height = height ?? videoMode.size.height
+        let refreshRate = refreshRate ?? .dontCare
+        
+        glfwSetWindowMonitor(pointer, monitor.pointer, Int32(x), Int32(y), Int32(width), Int32(height), Int32(refreshRate))
+    }
+    
     public func set(cursor: glfw.Cursor?) {
         guard let windowPointer = self.pointer else { return }
         

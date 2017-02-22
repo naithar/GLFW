@@ -135,28 +135,28 @@ public extension glfw.Monitor {
             self.ramp = ramp
         }
         
-        public lazy var size: Int = {
+        public var size: Int {
             guard let ramp = self.ramp else { return 0 }
             return Int(ramp.size)
-        }()
+        }
         
-        public lazy var red: [Int] = {
+        public var red: [Int] {
             guard let ramp = self.ramp, let red = ramp.red else { return [] }
             let buffer = UnsafeBufferPointer(start: red, count: self.size)
             return [UInt16](buffer).map { Int($0) }
-        }()
+        }
         
-        public lazy var green: [Int] = {
+        public var green: [Int] {
             guard let ramp = self.ramp, let green = ramp.green else { return [] }
             let buffer = UnsafeBufferPointer(start: green, count: self.size)
             return [UInt16](buffer).map { Int($0) }
-        }()
+        }
         
-        public lazy var blue: [Int] = {
+        public var blue: [Int] {
             guard let ramp = self.ramp, let blue = ramp.blue else { return [] }
             let buffer = UnsafeBufferPointer(start: blue, count: self.size)
             return [UInt16](buffer).map { Int($0) }
-        }()
+        }
     }
     
     public var name: String? {
