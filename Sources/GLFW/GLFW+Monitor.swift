@@ -11,6 +11,9 @@ import CGLFW
 
 public extension glfw {
     
+    //TODO:
+    //monitor->callbacks
+    
     // TODO: struct?
     public final class Monitor {
         
@@ -68,6 +71,8 @@ public extension glfw {
 }
 
 public extension glfw.Monitor {
+    
+    //TODO: video mode
     
     public var name: String? {
         guard let pointer = self.pointer,

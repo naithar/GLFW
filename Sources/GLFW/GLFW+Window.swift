@@ -109,7 +109,7 @@ public extension glfw {
     }
 }
 
-//TODO: cursor http://www.glfw.org/docs/latest/input_guide.html#cursor_standard
+
 
 public extension glfw.Window {
     
@@ -121,8 +121,9 @@ public extension glfw.Window {
         //window->callbacks
         //window->framebuffer->callbacks
         //window->cursor->callbacks
+        //window->input->callbacks
         //vs
-        //window->callbacks (window, framebuffer, cursor)
+        //window->callbacks (window, framebuffer, cursor, input)
         
         public typealias WindowCallback = (glfw.Window) -> Void
         public typealias WindowPositionCallback = (glfw.Window, Point) -> Void
@@ -194,7 +195,6 @@ public extension glfw.Window {
         public var size: WindowSizeCallback? {
             didSet {
                 guard let pointer = self.window?.pointer else { return }
-                
                 if oldValue == nil {
                     glfwSetWindowSizeCallback(pointer) { pointer, width, height in
                         guard let pointer = pointer,
@@ -504,16 +504,21 @@ public extension glfw.Window {
     }
     
     public var monitor: glfw.Monitor? {
-        get {
-            return nil
-        }
-        set {
+//        get {
+            return glfw.Monitor(for: self)
+//        }
+        // TODO: monitor setting
+//        set {
 //            guard let pointer = self.pointer else { return }
 //            let monitor = glfwGetPrimaryMonitor()
 //            let frame = glfwGetVideoMode(monitor)
 //            
 //            glfwSetWindowMonitor(pointer, monitor, 0, 0, Int32(frame!.pointee.width), Int32(frame!.pointee.height), Int32(.dontCare))
-        }
+//        }
+    }
+    
+    public var cursor: glfw.Cursor? {
+        return nil
     }
     
     //TODO: isFocused
