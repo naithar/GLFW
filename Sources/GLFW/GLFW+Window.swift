@@ -113,6 +113,15 @@ public extension glfw.Window {
     
     public class Callbacks {
         
+        // TODO: cursor callbacks
+        
+        // TODO: deside over
+        //window->callbacks
+        //window->framebuffer->callbacks
+        //window->cursor->callbacks
+        //vs
+        //window->callbacks (window, framebuffer, cursor)
+        
         public typealias WindowCallback = (glfw.Window) -> Void
         public typealias WindowPositionCallback = (glfw.Window, Point) -> Void
         public typealias WindowSizeCallback = (glfw.Window, Size) -> Void
@@ -406,6 +415,47 @@ public extension glfw.Window {
         glfwFocusWindow(pointer)
     }
     
+    public var isMinimized: Bool {
+        get {
+            return self.value(for: .iconified) != 0
+        }
+        set {
+            guard let pointer = self.pointer else { return }
+            if newValue {
+                glfwIconifyWindow(pointer)
+            } else if self.isMinimized {
+                glfwRestoreWindow(pointer)
+            }
+        }
+    }
+    
+    public var isMaximized: Bool {
+        get {
+            return self.value(for: .maximized) != 0
+        }
+        set {
+            guard let pointer = self.pointer else { return }
+            if newValue {
+                glfwMaximizeWindow(pointer)
+            } else if self.isMaximized {
+                glfwRestoreWindow(pointer)
+            }
+        }
+    }
+    
+    public var monitor: glfw.Monitor? {
+        get {
+            return nil
+        }
+        set {
+//            guard let pointer = self.pointer else { return }
+//            let monitor = glfwGetPrimaryMonitor()
+//            let frame = glfwGetVideoMode(monitor)
+//            
+//            glfwSetWindowMonitor(pointer, monitor, 0, 0, Int32(frame!.pointee.width), Int32(frame!.pointee.height), Int32(.dontCare))
+        }
+    }
+    
     //TODO: isFocused
     
     // TODO: http://www.glfw.org/docs/latest/window_guide.html#window_iconify
@@ -448,6 +498,8 @@ public extension glfw.Window {
     public enum Attribute {
         case visible
         case focused
+        case iconified
+        case maximized
         
         internal var name: Int32 {
             switch self {
@@ -455,6 +507,10 @@ public extension glfw.Window {
                 return GLFW_FOCUSED
             case .visible:
                 return GLFW_VISIBLE
+            case .iconified:
+                return GLFW_ICONIFIED
+            case .maximized:
+                return GLFW_MAXIMIZED
             }
         }
     }
@@ -464,7 +520,7 @@ public extension glfw.Window {
     
     public enum Hint {
         
-        case `default`
+        case `default` // Used to reset all hints
         
         internal var name: Int32 {
             switch self {
