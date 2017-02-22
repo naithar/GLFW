@@ -13,7 +13,7 @@ public typealias Point = CGPoint
 public typealias Size = CGSize
 public typealias Rect = CGRect
 
-
+//TODO: input http://www.glfw.org/docs/latest/input_guide.html#input_key
 
 public extension glfw {
     
@@ -115,6 +115,67 @@ public extension glfw.Window {
     
     public class Callbacks {
         
+        
+        public struct KeyboardInput {
+            
+            public enum Key {
+                case unknown(Int32)
+                
+                fileprivate init(value: Int32) {
+                    self = .unknown(value)
+                }
+            }
+            
+            public struct Modifier: OptionSet {
+                
+                public private(set) var rawValue: Int32
+                
+                public init(rawValue: Int32) {
+                    self.rawValue = rawValue
+                }
+                
+                static public let shift = Modifier(rawValue: 1)
+                static public let control = Modifier(rawValue: 2)
+                static public let alt = Modifier(rawValue: 4)
+                static public let `super` = Modifier(rawValue: 8)
+                
+                //TODO: http://www.glfw.org/docs/latest/group__mods.html
+            }
+            
+            //TODO: http://www.glfw.org/docs/latest/group__input.html#ga2485743d0b59df3791c45951c4195265
+            public enum Action {
+                case unknown
+                case press
+                case release
+                case `repeat`
+                
+                fileprivate init(value: Int32) {
+                    switch value {
+                    case GLFW_PRESS:
+                        self = .press
+                    case GLFW_RELEASE:
+                        self = .release
+                    case GLFW_REPEAT:
+                        self = .repeat
+                    default:
+                        self = .unknown
+                    }
+                }
+            }
+            //TODO: keys http://www.glfw.org/docs/latest/group__keys.html#gabf48fcc3afbe69349df432b470c96ef2
+            public var key: Key
+            public var scancode: Int32
+            public var action: Action
+            public var modifiers: Modifier
+            
+            fileprivate init(key: Int32, scancode: Int32, action: Int32, modifiers: Int32) {
+                self.key = Key(value: key)
+                self.scancode = scancode
+                self.action = Action(value: action)
+                self.modifiers = Modifier(rawValue: modifiers)
+            }
+        }
+        
         // TODO: cursor callbacks
         
         // TODO: deside over
@@ -129,6 +190,7 @@ public extension glfw.Window {
         public typealias WindowPositionCallback = (glfw.Window, Point) -> Void
         public typealias WindowSizeCallback = (glfw.Window, Size) -> Void
         public typealias WindowBoolCallback = (glfw.Window, Bool) -> Void
+        public typealias WindowKeyboardCallback = (glfw.Window, KeyboardInput) -> Void
         
         private weak var window: glfw.Window?
 
@@ -414,7 +476,35 @@ public extension glfw.Window {
             self.cursorEnter = callback
             return self
         }
-
+        
+        // MARK: Keyboard input callback
+        
+        public var keyboard: WindowKeyboardCallback? {
+            didSet {
+                guard let pointer = self.window?.pointer else { return }
+                if oldValue == nil {
+                    
+                    glfwSetKeyCallback(pointer) { pointer, key, scancode, action, modifiers in
+                        guard let pointer = pointer,
+                            let window = glfw.Window.map[pointer],
+                            let callback = window.callbacks.keyboard else {
+                                return
+                        }
+                        
+                        let keyboardInput = KeyboardInput(key: key, scancode: scancode, action: action, modifiers: modifiers)
+                        callback(window, keyboardInput)
+                    }
+                } else if self.keyboard == nil && oldValue != nil {
+                    glfwSetKeyCallback(pointer, nil)
+                }
+            }
+        }
+        
+        @discardableResult
+        public func keyboard(_ callback: WindowKeyboardCallback?) -> Callbacks {
+            self.keyboard = callback
+            return self
+        }
     }
 }
 
