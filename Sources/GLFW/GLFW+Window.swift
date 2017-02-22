@@ -517,8 +517,14 @@ public extension glfw.Window {
 //        }
     }
     
-    public var cursor: glfw.Cursor? {
-        return nil
+//    public var cursor: glfw.Cursor? {
+//        return nil
+//    }
+    
+    public func set(cursor: glfw.Cursor?) {
+        guard let windowPointer = self.pointer else { return }
+        
+        glfwSetCursor(windowPointer, cursor?.pointer)
     }
     
     //TODO: isFocused
