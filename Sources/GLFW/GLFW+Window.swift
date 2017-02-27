@@ -179,8 +179,33 @@ public extension glfw.Window {
                     case nine = 9//...nine
                 }
                 
-                public enum Character {
-                    case a // ...z
+                public enum Character: String {
+                    case a = "A"
+                    case b = "B"
+                    case c = "C"
+                    case d = "D"
+                    case e = "E"
+                    case f = "F"
+                    case g = "G"
+                    case h = "H"
+                    case i = "I"
+                    case j = "J"
+                    case k = "K"
+                    case l = "L"
+                    case m = "M"
+                    case n = "N"
+                    case o = "O"
+                    case p = "P"
+                    case q = "Q"
+                    case r = "R"
+                    case s = "S"
+                    case t = "T"
+                    case u = "U"
+                    case v = "V"
+                    case w = "W"
+                    case x = "X"
+                    case y = "Y"
+                    case z = "Z"
                 }
                 
                 case number(Number)
@@ -270,15 +295,26 @@ public extension glfw.Window {
                         self = .rightSuper
                     case GLFW_KEY_MENU, GLFW_KEY_LAST:
                         self = .menu
-                    case GLFW_KEY_0...GLFW_KEY_9:
+                    case GLFW_KEY_0...GLFW_KEY_9: // 48 ... 57
                         let numberValue = Int(value - 48)
                         guard let number = Number(rawValue: numberValue) else {
                             self = .unknown(value)
                             return
                         }
                         self = .number(number)
-                    case GLFW_KEY_A...GLFW_KEY_Z:
-                        fallthrough
+                    case GLFW_KEY_A...GLFW_KEY_Z: //65 ... 90
+                        guard let start = UnicodeScalar("A") else {
+                            self = .unknown(value)
+                            return
+                        }
+                        let keyValue = Int(value - 65)
+                        
+                        guard let key = UnicodeScalar(Int(start.value) + keyValue),
+                            let character = Character(rawValue: String(Swift.Character(key))) else {
+                            self = .unknown(value)
+                            return
+                        }
+                        self = .character(character)
                     default:
                         self = .unknown(value)
                     }
