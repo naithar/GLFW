@@ -153,7 +153,7 @@ public extension glfw.Window {
                 case numLock
                 case printScreen
                 case pause
-                case leftShift
+                case leftShift //TODO: .shift(.left)
                 case leftControl
                 case leftAlt
                 case leftSuper

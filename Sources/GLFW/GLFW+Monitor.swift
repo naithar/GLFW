@@ -17,6 +17,48 @@ public extension glfw {
     // TODO: struct?
     public final class Monitor {
         
+        enum Event {
+            case connected
+            case disconnected
+            
+            fileprivate init?(raw: Int32) {
+                switch raw {
+                case GLFW_CONNECTED:
+                    self = .connected
+                case GLFW_DISCONNECTED:
+                    self = .disconnected
+                default:
+                    return nil
+                }
+            }
+        }
+        
+        typealias MonitorCallback = (glfw.Monitor, Event) -> Void
+        private static var monitorCallback: MonitorCallback? {
+            didSet {
+                if oldValue == nil {
+                    glfwSetMonitorCallback { pointer, event in
+                        guard let pointer = pointer,
+                            let event = Event(raw: event),
+                            let callback = glfw.Monitor.monitorCallback else {
+                                return
+                        }
+                        
+                        guard let monitor = glfw.Monitor.map[pointer]
+                            ?? glfw.Monitor.init(pointer: pointer) else { return }
+                        
+                        callback(monitor, event)
+                    }
+                } else if self.monitorCallback == nil && oldValue != nil {
+                    glfwSetMonitorCallback(nil)
+                }
+            }
+        }
+        
+        static func callback(_ action: MonitorCallback?) {
+            self.monitorCallback = action
+        }
+        
         public static let primary = glfw.Monitor.init(pointer: glfwGetPrimaryMonitor())! //Should never fail
         
         public static var all: [glfw.Monitor] {
